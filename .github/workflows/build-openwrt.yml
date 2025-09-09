@@ -7,14 +7,12 @@
 # https://github.com/P3TERX/Actions-OpenWrt
 # Description: Build OpenWrt using GitHub Actions
 #
-
 name: Build GSWIFI PSG1218
 
 on:
   workflow_dispatch:
 
 env:
-  # OpenWrt 仓库信息（GSWIFI 项目已包含源码）
   CONFIG_FILE: config
   DIY_P2_SH: diy-part2.sh
   TZ: Asia/Shanghai
@@ -24,7 +22,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      
+     
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -43,11 +41,20 @@ jobs:
           chmod +x ${{ env.DIY_P2_SH }}
           ./${{ env.DIY_P2_SH }}
 
-      
+     
       - name: Apply custom config
         run: |
           cp ${{ env.CONFIG_FILE }} .config
           make defconfig
+
+      
+      - name: Get device name
+        id: device
+        run: |
+          DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
+          echo "DEVICE_NAME=$DEVICE_NAME" >> $GITHUB_ENV
+          FILE_DATE=$(date +"%Y%m%d%H%M")
+          echo "FILE_DATE=$FILE_DATE" >> $GITHUB_ENV
 
       
       - name: Compile firmware
@@ -59,5 +66,5 @@ jobs:
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v3
         with:
-          name: GSWIFI-PSG1218
+          name: GSWIFI-${{ env.DEVICE_NAME }}-${{ env.FILE_DATE }}
           path: bin/targets/ramips/mt7620/
