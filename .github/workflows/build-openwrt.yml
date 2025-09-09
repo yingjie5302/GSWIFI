@@ -24,11 +24,11 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      # 1. Checkout 仓库
+      
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. 设置时区并安装依赖
+      
       - name: Install dependencies
         run: |
           sudo timedatectl set-timezone "$TZ"
@@ -37,25 +37,25 @@ jobs:
           gettext git java-propose-classpath libncurses5-dev libssl-dev \
           python3 python3-distutils unzip wget subversion mercurial
 
-      # 3. 更新 feeds 并执行 diy-part2.sh
+      
       - name: Update and install feeds
         run: |
           chmod +x ${{ env.DIY_P2_SH }}
           ./${{ env.DIY_P2_SH }}
 
-      # 4. 应用 config 文件
+      
       - name: Apply custom config
         run: |
           cp ${{ env.CONFIG_FILE }} .config
           make defconfig
 
-      # 5. 编译固件
+      
       - name: Compile firmware
         run: |
           echo "Start compiling PSG1218 firmware using $(nproc) cores"
           make -j$(nproc) V=s
 
-      # 6. 上传固件 artifact
+      
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v3
         with:
